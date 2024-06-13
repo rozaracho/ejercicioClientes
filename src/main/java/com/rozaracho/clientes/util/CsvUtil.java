@@ -32,6 +32,7 @@ public class CsvUtil {
                 cliente.setId(Integer.parseInt(csvRecord.get("ID")));
                 cliente.setNombre(csvRecord.get("Nombre"));
                 cliente.setEmail(csvRecord.get("Email"));
+                cliente.setCreditos(Integer.valueOf(csvRecord.get("Creditos")));
                 clientes.add(cliente);
             }
             return clientes;
