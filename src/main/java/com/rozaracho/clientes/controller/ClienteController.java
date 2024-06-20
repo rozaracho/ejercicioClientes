@@ -1,16 +1,15 @@
 package com.rozaracho.clientes.controller;
 
 import com.rozaracho.clientes.Cliente;
+import com.rozaracho.clientes.Credito;
+import com.rozaracho.clientes.RegistroCredito;
 import com.rozaracho.clientes.service.ClienteService;
+import com.rozaracho.clientes.service.RegistroCreditoService;
 import com.rozaracho.clientes.util.CsvUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.LinkedHashMap;
@@ -22,6 +21,9 @@ import java.util.Map;
 public class ClienteController {
     @Autowired
     ClienteService clienteService;
+
+    @Autowired
+    RegistroCreditoService registroCreditoService;
 
     @PostMapping("/csv/upload")
     public ResponseEntity< ? > uploadFile(@RequestParam("file") MultipartFile file) {
@@ -55,4 +57,33 @@ public class ClienteController {
             return new ResponseEntity < > (respCliente, HttpStatus.NOT_FOUND);
         }
     }
+
+    @PutMapping("/creditos/envio")
+    public ResponseEntity< ? > enviarCreditp(@RequestBody Credito credito) {
+        String message = "";
+        if (credito != null) {
+            registroCreditoService.save(credito);
+            message = "El credit0 se envio con éxito";
+            return ResponseEntity.status(HttpStatus.OK).body(message);
+        }
+        message = "El credito no pudo ser enviado";
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+    }
+
+    @GetMapping("/registros")
+    public ResponseEntity < ? > getTotalCreditosEnFecha() {
+        Map<String, Object> respCliente = new LinkedHashMap<String, Object>();
+        List<RegistroCredito> creditos = registroCreditoService.findAll();
+        if (!creditos.isEmpty()) {
+            respCliente.put("status", 1);
+            respCliente.put("data", creditos);
+            return new ResponseEntity<>(respCliente, HttpStatus.OK);
+        } else {
+            respCliente.clear();
+            respCliente.put("status", 0);
+            respCliente.put("message", "No fueron encontrados registros de creditos");
+            return new ResponseEntity<>(respCliente, HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
